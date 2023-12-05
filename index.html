@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+  <meta charset="utf-8">
+  <title>Gathery Сценарій</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+  <script src="script.js" defer></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div class="tools">
+    <label for="editModeCheckbox">
+      <iconify-icon icon="mi:edit" style="margin: 10px; font-size: x-large;"></iconify-icon>
+    </label>
+    <input type="checkbox" id="editModeCheckbox" onchange="toggleEditMode()" class="check">
+    <button id="addButton" onclick="addText()" style="display: none; height: 40px; width: 40px; margin-top: 10px; border-radius: 50%; border: 1px; box-shadow: 0px 0px 4px 0px; margin: 5px;">
+      <iconify-icon icon="ion:text" style="font-size: x-large;"></iconify-icon>
+    </button>
+    <button id="txtButton" onclick="addPerformance()" style="display: none; height: 40px; width: 40px; margin-top: 10px; border-radius: 50%; border: 1px; box-shadow: 0px 0px 4px 0px; margin: 5px;">
+      <iconify-icon icon="mdi:theatre" style="font-size: x-large;"></iconify-icon>
+    </button>
+    <button id="previewButton" onclick="togglePreviewMode()" style="display: none; height: 40px; width: 40px; margin-top: 10px; border-radius: 50%; border: 1px; box-shadow: 0px 0px 4px 0px; margin: 5px;">
+      <iconify-icon icon="bx:bx-show" style="font-size: x-large;"></iconify-icon>
+    </button>
+  </div>
+  <div class="title">
+    <input type="text" placeholder="Title" class="title-box" id="tt">
+    <input type="text" placeholder="Sub Text" class="sub-box">
+  </div>
+  <ul class="sortable-list" id="sortable-list">
+  </ul>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    .title-box, .sub-box, .pers, .prf, .pers-l, .sel {
+      font-weight: bold;
+      font-family: 'Poppins', sans-serif;
+    }
+    .title-box {
+      width: 500px;
+      text-align: center;
+      display: flex;
+      margin: 0 auto;
+      border: none;
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .sub-box {
+      width: 500px;
+      text-align: center;
+      display: flex;
+      margin: 0 auto;
+      border: none;
+      font-size: 15px;
+      margin-bottom: 50px;
+    }
+    body {
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .sortable-list {
+      width: 100%;
+      padding: 5px;
+      border-radius: 7px;
+    }
+    .sortable-list .item {
+      width: 100%;
+      list-style: none;
+      display: flex;
+      cursor: move;
+      align-items: center;
+      border-radius: 5px;
+      justify-content: space-between;
+      position: relative;
+      background: #fff;
+
+      margin-bottom: 5px;
+      padding: 10px;
+    }
+    .item .details {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .item.dragging {
+      opacity: 0.6;
+    }
+    .item.dragging :where(.details, i, button) {
+      opacity: 0;
+    }
+    .osob, .pers-l {
+      font-weight: bold;
+      border: none;
+      width: fit-content;
+    }
+    .details {
+      display: flex;
+    }
+    .tools {
+      display: flex;
+      left: 0%;
+    }
+    .check {
+      font-size: large;
+      display: none;
+    }
+    input, textarea, select {
+      resize: vertical;
+      background: none;
+      border: none;
+      margin-left: 10px;
+      width: 100%;
+      padding: 4px;
+      margin-top: 2px;
+    }
+    .pers, .prf {
+      font-weight: bold;
+      font-family: 'Poppins', sans-serif;
+    }
+  
+    .pers-l {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300;
+      margin-top: 5px;
+    }
+  
+    .sel {
+      margin-top: 2px;
+      width: 100%;
+    }
+    .preview-mode .tools button:not(#previewButton),
+    .preview-mode input,
+    .preview-mode textarea,
+    .preview-mode select {
+      display: none;
+    }
+  </style>
+
+  <script>
+    function togglePreviewMode() {
+      const previewButton = document.getElementById("previewButton");
+      const body = document.body;
+      body.classList.toggle("preview-mode");
+      toggleEditMode(); // Update the UI based on the edit mode checkbox
+    }
+
+    function autoResizeTextarea(element) {
+      element.style.height = "auto";
+      element.style.height = (element.scrollHeight) + "px";
+    }
+
+    function toggleEditMode() {
+      const editModeCheckbox = document.getElementById("editModeCheckbox");
+      const addButton = document.getElementById("addButton");
+      const txtButton = document.getElementById("txtButton");
+      const saveButton = document.getElementById("saveButton");
+    
+      const items = document.querySelectorAll(".sortable-list .item");
+
+      items.forEach(item => {
+        item.style.background = editModeCheckbox.checked ? "#ddd" : "#fff";
+      });
+
+      addButton.style.display = editModeCheckbox.checked ? "block" : "none";
+      txtButton.style.display = editModeCheckbox.checked ? "block" : "none";
+      saveButton.style.display = editModeCheckbox.checked ? "block" : "none";
+      previewButton
+    }
+
+    function addText() {
+      const a = document.getElementById("sortable-list");
+      const newDiv = document.createElement("li");
+      newDiv.classList.add("item");
+      newDiv.draggable = true;
+      newDiv.innerHTML += `
+        <div class="details">
+            <div>
+                <input type="text" placeholder="Введіть особу" class="pers">
+            </div>
+            <span style="margin-left: 5px;">:</span>
+          <textarea type="text" placeholder="Введіть текст" rows=1></textarea>
+        </div>
+       `;
+      newDiv.addEventListener("dragstart", () => {
+        setTimeout(() => newDiv.classList.add("dragging"), 0);
+      });
+      newDiv.addEventListener("dragend", () => newDiv.classList.remove("dragging"));
+      const editModeCheckbox = document.getElementById("editModeCheckbox");
+      if (editModeCheckbox.checked) {
+        newDiv.style.background = "#ddd";
+        newDiv.addEventListener("click", () => {
+          if (editModeCheckbox.checked) {
+            removeItem(newDiv);
+          }
+        });
+        newDiv.addEventListener("input", function () {
+          autoResizeTextarea(newDiv.querySelector("textarea"));
+        });
+      }
+      a.appendChild(newDiv);
+    }
+
+    function addPerformance() {
+      const a = document.getElementById("sortable-list");
+      const newDiv = document.createElement("li");
+      newDiv.classList.add("item");
+      newDiv.draggable = true;
+      newDiv.innerHTML += `
+        <div class="details">
+          <div class="sel" style="display:flex;">
+            <select name="languages" class="sel" style="border: none; bgcolor: none; margin-top: 5px; font-weight: bold; width: 55px;">
+              <option>-</option>
+              <option>5А</option>
+              <option>5Б</option>
+              <option>5В</option>
+              <option>5Г</option>
+              <option>6А</option>
+              <option>6Б</option>
+              <option>6В</option>
+              <option>6Г</option>
+              <option>7А</option>
+              <option>7Б</option>
+              <option>7В</option>
+              <option>7Г</option>
+              <option>8А</option>
+              <option>8Б</option>
+              <option>8В</option>
+              <option>8Г</option>
+              <option>9А</option>
+              <option>9Б</option>
+              <option>9В</option>
+              <option>10А</option>
+              <option>10Б</option>
+              <option>10В</option>
+              <option>11А</option>
+              <option>11Б</option>
+            </select>
+            <input placeholder="Комент" style="left:0%;"></input>
+          </div>
+        </div>`;
+      newDiv.addEventListener("dragstart", () => {
+        setTimeout(() => newDiv.classList.add("dragging"), 0);
+      });
+      newDiv.addEventListener("dragend", () => newDiv.classList.remove("dragging"));
+      const editModeCheckbox = document.getElementById("editModeCheckbox");
+      if (editModeCheckbox.checked) {
+        newDiv.style.background = "#ddd";
+        newDiv.addEventListener("click", () => {
+          if (editModeCheckbox.checked) {
+            removeItem(newDiv);
+          }
+        });
+      }
+      a.appendChild(newDiv);
+    }
+
+    function removeItem(element) {
+      const container = document.getElementById("sortable-list");
+      container.removeChild(element);
+    }
+
+    const sortableList = document.querySelector(".sortable-list");
+    const items = sortableList.querySelectorAll(".item");
+    items.forEach(item => {
+      item.addEventListener("dragstart", () => {
+        setTimeout(() => item.classList.add("dragging"), 0);
+      });
+      item.addEventListener("dragend", () => item.classList.remove("dragging"));
+    });
+
+    const initSortableList = (e) => {
+      e.preventDefault();
+      const draggingItem = document.querySelector(".dragging");
+      let siblings = [...sortableList.querySelectorAll(".item:not(.dragging)")];
+
+      let nextSibling = siblings.find(sibling => {
+        return e.clientY <= sibling.offsetTop + sibling.offsetHeight / 2;
+      });
+      // Inserting the dragging item before the found sibling
+      sortableList.insertBefore(draggingItem, nextSibling);
+    }
+
+    sortableList.addEventListener("dragover", initSortableList);
+    sortableList.addEventListener("dragenter", e => e.preventDefault());
+  
+  </script>
+</body>
+</html>
