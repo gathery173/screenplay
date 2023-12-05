@@ -26,6 +26,9 @@
     <button id="previewButton" onclick="togglePreviewMode()" style="display: none; height: 40px; width: 40px; margin-top: 10px; border-radius: 50%; border: 1px; box-shadow: 0px 0px 4px 0px; margin: 5px;">
       <iconify-icon icon="bx:bx-show" style="font-size: x-large;"></iconify-icon>
     </button>
+    <button id="previewButton" onclick="togglePreviewMode()" style="display: none; height: 40px; width: 40px; margin-top: 10px; border-radius: 50%; border: 1px; box-shadow: 0px 0px 4px 0px; margin: 5px;">
+      <iconify-icon icon="bx:bx-show" style="font-size: x-large;"></iconify-icon>
+    </button>
   </div>
   <div class="title">
     <input type="text" placeholder="Title" class="title-box" id="tt">
@@ -137,7 +140,7 @@
   
     .sel {
       margin-top: 2px;
-      width: 100%;
+      width: 300px;
     }
     .preview-mode .tools button:not(#previewButton),
     .preview-mode input,
@@ -219,7 +222,7 @@
       newDiv.innerHTML += `
         <div class="details">
           <div class="sel" style="display:flex;">
-            <select name="languages" class="sel" style="border: none; bgcolor: none; margin-top: 5px; font-weight: bold; width: 55px;">
+            <select name="languages" style="border: none; bgcolor: none; margin-top: 5px; font-weight: bold; width: 70px;">
               <option>-</option>
               <option>5А</option>
               <option>5Б</option>
@@ -246,7 +249,7 @@
               <option>11А</option>
               <option>11Б</option>
             </select>
-            <input placeholder="Комент" style="left:0%;"></input>
+            
           </div>
         </div>`;
       newDiv.addEventListener("dragstart", () => {
